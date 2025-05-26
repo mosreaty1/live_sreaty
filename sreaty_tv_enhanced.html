@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sreaty TV - Live Streaming Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: fit-content;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .sidebar-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .streams-list {
+            padding: 10px;
+        }
+
+        .stream-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .stream-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .stream-item.active {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .stream-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stream-category {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        .stream-description {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .video-container {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .quality-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quality-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quality-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .quality-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .stream-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .stream-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);
+        }
+
+        .stream-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .stream-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #videoPlayer {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            background: #000;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .current-stream-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .current-stream-info.active {
+            display: block;
+        }
+
+        .current-stream-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #4ecdc4;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-streams {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .category-filter {
+            margin-bottom: 15px;
+        }
+
+        .category-filter select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .category-filter select option {
+            background: #333;
+            color: #fff;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .sidebar {
+                max-height: 300px;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .quality-selector {
+                justify-content: center;
+            }
+            
+            .sidebar {
+                max-height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">SREATY TV</div>
+            <div class="tagline">Professional Live Streaming Platform</div>
+        </div>
+
+        <!-- Sidebar with Streams List -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">📺 Available Streams</div>
+                <div class="category-filter">
+                    <select id="categoryFilter" onchange="filterStreams()">
+                        <option value="">All Categories</option>
+                        <option value="General">General</option>
+                        <option value="Sports">Sports</option>
+                        <option value="News">News</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Movies">Movies</option>
+                        <option value="Music">Music</option>
+                    </select>
+                </div>
+            </div>
+            <div class="streams-list" id="streamsList">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Current Stream Info -->
+            <div class="current-stream-info" id="currentStreamInfo">
+                <div class="current-stream-name" id="currentStreamName"></div>
+                <div>Now Playing</div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="form-group">
+                    <label>Quality Settings</label>
+                    <div class="quality-selector">
+                        <button class="quality-btn active" data-quality="auto">Auto</button>
+                        <button class="quality-btn" data-quality="1080p">1080p</button>
+                        <button class="quality-btn" data-quality="720p">720p</button>
+                        <button class="quality-btn" data-quality="480p">480p</button>
+                        <button class="quality-btn" data-quality="360p">360p</button>
+                    </div>
+                </div>
+
+                <button class="stream-btn" id="playBtn" onclick="playSelectedStream()" disabled>
+                    🎬 Select a Stream to Play
+                </button>
+            </div>
+
+            <!-- Video Container -->
+            <div class="video-container">
+                <div class="video-placeholder" id="placeholder">
+                    <span style="font-size: 4rem;">📺</span>
+                    <h3>Ready to Stream</h3>
+                    <p>Select a stream from the sidebar and click play</p>
+                </div>
+                <video id="videoPlayer" controls style="display: none;"></video>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.10/hls.min.js"></script>
+    <script>
+        let currentQuality = 'auto';
+        let hls = null;
+        let streams = {};
+        let selectedStream = null;
+        let filteredStreams = {};
+
+        // Quality selector functionality
+        document.querySelectorAll('.quality-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentQuality = this.dataset.quality;
+            });
+        });
+
+        // Load streams on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStreams();
+        });
+
+        // Load available streams from API
+        async function loadStreams() {
+            try {
+                const response = await fetch('/api/streams');
+                const data = await response.json();
+                
+                if (data.success) {
+                    streams = data.streams;
+                    filteredStreams = streams;
+                    displayStreams();
+                } else {
+                    showError('Failed to load streams');
+                }
+            } catch (error) {
+                console.error('Error loading streams:', error);
+                showError('Error loading streams');
+            }
+        }
+
+        // Display streams in sidebar
+        function displayStreams() {
+            const streamsList = document.getElementById('streamsList');
+            
+            if (Object.keys(filteredStreams).length === 0) {
+                streamsList.innerHTML = '<div class="no-streams">No streams available</div>';
+                return;
+            }
+
+            streamsList.innerHTML = '';
+            
+            for (const [id, stream] of Object.entries(filteredStreams)) {
+                const streamItem = document.createElement('div');
+                streamItem.className = 'stream-item';
+                streamItem.dataset.streamId = id;
+                streamItem.innerHTML = `
+                    <div class="stream-name">${stream.name}</div>
+                    <div class="stream-category">${stream.category}</div>
+                    ${stream.description ? `<div class="stream-description">${stream.description}</div>` : ''}
+                `;
+                
+                streamItem.addEventListener('click', () => selectStream(id, stream));
+                streamsList.appendChild(streamItem);
+            }
+        }
+
+        // Filter streams by category
+        function filterStreams() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            if (categoryFilter === '') {
+                filteredStreams = streams;
+            } else {
+                filteredStreams = {};
+                for (const [id, stream] of Object.entries(streams)) {
+                    if (stream.category === categoryFilter) {
+                        filteredStreams[id] = stream;
+                    }
+                }
+            }
+            
+            displayStreams();
+        }
+
+        // Select a stream
+        function selectStream(streamId, streamData) {
+            // Remove active class from all items
+            document.querySelectorAll('.stream-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to selected item
+            const selectedItem = document.querySelector(`[data-stream-id="${streamId}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+            
+            selectedStream = { id: streamId, data: streamData };
+            
+            // Update play button
+            const playBtn = document.getElementById('playBtn');
+            playBtn.textContent = `🎬 Play ${streamData.name}`;
+            playBtn.disabled = false;
+        }
+
+        // Play selected stream
+        async function playSelectedStream() {
+            if (!selectedStream) {
+                alert('Please select a stream first');
+                return;
+            }
+
+            const playBtn = document.getElementById('playBtn');
+            playBtn.disabled = true;
+            playBtn.textContent = '⏳ Loading...';
+
+            try {
+                // Get encrypted link for the selected stream
+                const response = await fetch(`/api/stream/${selectedStream.id}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error);
+                }
+
+                // Decrypt the link
+                const decryptedLink = await decryptLink(data.encrypted_link);
+                
+                if (!decryptedLink) {
+                    throw new Error('Failed to decrypt stream link');
+                }
+
+                // Show current stream info
+                document.getElementById('currentStreamName').textContent = selectedStream.data.name;
+                document.getElementById('currentStreamInfo').classList.add('active');
+
+                // Start video playback
+                await startVideoPlayback(decryptedLink);
+                
+                playBtn.textContent = `🎬 Playing ${selectedStream.data.name}`;
+                
+            } catch (error) {
+                console.error('Playback error:', error);
+                alert('Failed to play stream: ' + error.message);
+                playBtn.textContent = `🎬 Play ${selectedStream.data.name}`;
+            } finally {
+                playBtn.disabled = false;
+            }
+        }
+
+        // Start video playback
+        async function startVideoPlayback(streamUrl) {
+            const video = document.getElementById('videoPlayer');
+            const placeholder = document.getElementById('placeholder');
+            
+            // Show video player
+            placeholder.style.display = 'none';
+            video.style.display = 'block';
+
+            // Initialize HLS player
+            if (Hls.isSupported()) {
+                if (hls) {
+                    hls.destroy();
+                }
+                
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
+                });
+                
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    console.log('Stream loaded successfully');
+                    video.play();
+                });
+
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('HLS Error:', data);
+                    if (data.fatal) {
+                        throw new Error('Fatal HLS error: ' + data.details);
+                    }
+                });
+                
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play();
+                });
+            } else {
+                throw new Error('Your browser does not support HLS streaming');
+            }
+        }
+
+        // Decrypt link function
+        async function decryptLink(encryptedLink) {
+            try {
+                const response = await fetch('/api/decrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        encrypted_link: encryptedLink,
+                        quality: currentQuality
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Decryption failed');
+                }
+
+                const data = await response.json();
+                return data.decrypted_link;
+            } catch (error) {
+                console.error('Decryption error:', error);
+                throw error;
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const streamsList = document.getElementById('streamsList');
+            streamsList.innerHTML = `<div class="no-streams">⚠️ ${message}</div>`;
+        }
+
+        // Auto-refresh streams every 30 seconds
+        setInterval(loadStreams, 30000);
+    </script>
+</body>
+</html>
